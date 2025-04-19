@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventory & Customer Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      margin: 20px;
+    }
+
+    form {
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    #inventoryForm button {
+      background-color: #28a745;
+      color: white;
+    }
+
+    #inventoryForm button:hover {
+      background-color: #218838;
+    }
+
+    #customerForm button {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #customerForm button:hover {
+      background-color: #0056b3;
+    }
+
+    .display-section {
+      margin-top: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .display-section h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .item-entry, .customer-entry {
+      margin-bottom: 15px;
+      padding: 12px;
+      border-left: 5px solid;
+      background-color: #f1f8ff;
+    }
+
+    .item-entry {
+      border-color: #28a745;
+      background-color: #e9f7ef;
+    }
+
+    .customer-entry {
+      border-color: #007bff;
+      background-color: #eaf4ff;
+    }
+
+    @media (max-width: 768px) {
+      table, tr, td {
+        display: block;
+        width: 100%;
+      }
+
+      td {
+        margin-bottom: 15px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Inventory Form -->
+  <form id="inventoryForm">
+    <h2 align="center">Inventory Management</h2>
+    <table>
+      <tr>
+        <td><label for="item">Add or Update Inventory</label></td>
+        <td><label for="invPrice">Enter Price</label></td>
+        <td><label for="invQuantity">Enter Quantity</label></td>
+      </tr>
+      <tr>
+        <td><input type="text" id="item" placeholder="Add/Update Inventory" required></td>
+        <td><input type="number" id="invPrice" placeholder="Enter Price" required></td>
+        <td><input type="number" id="invQuantity" placeholder="Enter Quantity" required></td>
+      </tr>
+      <tr>
+        <td colspan="3" align="center">
+          <button type="submit">Submit Inventory</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- Inventory Display -->
+  <div class="display-section" id="inventoryDisplay">
+    <h3>Inventory List</h3>
+    <div id="inventoryList"></div>
+  </div>
+
+  <!-- Customer Form -->
+  <form id="customerForm">
+    <h2 align="center">Customer Information</h2>
+    <table>
+      <tr>
+        <td><label for="customerName">Customer Name</label></td>
+        <td><label for="phone">Phone Number</label></td>
+      </tr>
+      <tr>
+        <td><input type="text" id="customerName" placeholder="Enter Customer Name" required></td>
+        <td><input type="tel" id="phone" placeholder="Enter Phone Number" required></td>
+      </tr>
+      <tr>
+        <td><label for="email">Gmail Address</label></td>
+        <td><label for="address">Physical Address</label></td>
+      </tr>
+      <tr>
+        <td><input type="email" id="email" placeholder="Enter Gmail Address" required></td>
+        <td><input type="text" id="address" placeholder="Enter Physical Address" required></td>
+      </tr>
+      <tr>
+        <td><label for="product">Product Purchased</label></td>
+        <td><label for="custQuantity">Quantity</label></td>
+        <td><label for="custPrice">Price</label></td>
+      </tr>
+      <tr>
+        <td><input type="text" id="product" placeholder="Enter Product Name" required></td>
+        <td><input type="number" id="custQuantity" placeholder="Enter Quantity" required></td>
+        <td><input type="number" id="custPrice" placeholder="Enter Price" required></td>
+      </tr>
+      <tr>
+        <td colspan="3" align="center">
+          <button type="submit">Submit Customer</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- Customer Display -->
+  <div class="display-section" id="customerDisplay">
+    <h3>Customer Purchases</h3>
+    <div id="customerList"></div>
+  </div>
+
+  <!-- JavaScript Section -->
+  <script>
+    // Inventory Logic
+    const inventoryForm = document.getElementById('inventoryForm');
+    const inventoryList = document.getElementById('inventoryList');
+    let inventoryData = JSON.parse(localStorage.getItem('inventory')) || [];
+
+    function displayInventory() {
+      inventoryList.innerHTML = '';
+      inventoryData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item-entry';
+        div.innerHTML = `<strong>Item:</strong> ${item.item} |
+                         <strong>Price:</strong> $${item.price} |
+                         <strong>Quantity:</strong> ${item.quantity}`;
+        inventoryList.appendChild(div);
+      });
+    }
+
+    displayInventory();
+
+    inventoryForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const item = document.getElementById('item').value;
+      const price = document.getElementById('invPrice').value;
+      const quantity = document.getElementById('invQuantity').value;
+
+      inventoryData.push({ item, price, quantity });
+      localStorage.setItem('inventory', JSON.stringify(inventoryData));
+      displayInventory();
+      inventoryForm.reset();
+    });
+
+    // Customer Logic + WhatsApp Integration
+    const customerForm = document.getElementById("customerForm");
+    let customerData = JSON.parse(localStorage.getItem('customers')) || [];
+
+    function displayCustomers() {
+      const customerListDiv = document.getElementById('customerList');
+      customerListDiv.innerHTML = '';
+      customerData.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'customer-entry';
+        div.innerHTML = `
+          <strong>Name:</strong> ${entry.name}<br>
+          <strong>Phone:</strong> ${entry.phone}<br>
+          <strong>Email:</strong> ${entry.email}<br>
+          <strong>Address:</strong> ${entry.address}<br>
+          <strong>Product:</strong> ${entry.product}<br>
+          <strong>Quantity:</strong> ${entry.quantity}<br>
+          <strong>Price:</strong> $${entry.price}
+        `;
+        customerListDiv.appendChild(div);
+      });
+    }
+
+    displayCustomers();
+
+    customerForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('customerName').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const address = document.getElementById('address').value;
+      const product = document.getElementById('product').value;
+      const quantity = document.getElementById('custQuantity').value;
+      const price = document.getElementById('custPrice').value;
+
+      const customer = { name, phone, email, address, product, quantity, price };
+      customerData.push(customer);
+      localStorage.setItem('customers', JSON.stringify(customerData));
+      displayCustomers();
+
+      // WhatsApp integration with auto +91 prefix
+      let formattedPhone = phone.replace(/\D/g, '');
+      if (formattedPhone.startsWith("0")) {
+        formattedPhone = formattedPhone.substring(1);
+      }
+      if (!formattedPhone.startsWith("91")) {
+        formattedPhone = "91" + formattedPhone;
+      }
+
+      const message = `Hi ${name}, thank you for purchasing ${quantity} x ${product} for $${price}. We appreciate your business!`;
+      const whatsappURL = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappURL, '_blank');
+
+      customerForm.reset();
+    });
+  </script>
+</body>
+</html>
